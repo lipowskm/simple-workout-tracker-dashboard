@@ -1,5 +1,4 @@
 # simple-workout-tracker-dashboard
-<<<<<<< HEAD
 
 ## Project setup
 ```
@@ -23,6 +22,3 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
-=======
-Workout tracker application frontend
->>>>>>> 7724c8adcc508e5561a82276a179c694f29688f4
