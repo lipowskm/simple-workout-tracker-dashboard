@@ -66,7 +66,7 @@
               <div v-if="registerButtonClicked">
                 <v-card-text>
                     <v-form>
-                      <ValidationProvider name="First name" rules="required|min:3" mode="passive">
+                      <ValidationProvider name="First name" rules="required|min:3" mode="eager">
                       <v-text-field slot-scope="{ errors }"
                                     :error-messages="errors"
                                     v-model="firstName"
@@ -78,7 +78,7 @@
                                     name="lastName"
                                     label="Last name"
                                     type="text"></v-text-field>
-                      <ValidationProvider name="Email" rules="required|email" mode="passive">
+                      <ValidationProvider name="Email" rules="required|email" mode="eager">
                       <v-text-field slot-scope="{ errors }"
                                     :error-messages="errors"
                                     v-model="email"
@@ -87,7 +87,7 @@
                                     label="Email"
                                     type="text"></v-text-field>
                       </ValidationProvider>
-                      <ValidationProvider name="Username" rules="required|min:3" mode="passive">
+                      <ValidationProvider name="Username" rules="required|min:3" mode="eager">
                       <v-text-field slot-scope="{ errors }"
                                     :error-messages="errors"
                                     v-model="username"
@@ -96,7 +96,7 @@
                                     label="Username"
                                     type="text"></v-text-field>
                       </ValidationProvider>
-                      <ValidationProvider name="Password" rules="required|min:6" mode="passive">
+                      <ValidationProvider name="Password" rules="required|min:6" mode="eager">
                       <v-text-field slot-scope="{ errors }"
                                     :error-messages="errors"
                                     v-model="password"
@@ -131,8 +131,6 @@ import { required, email, min } from 'vee-validate/dist/rules'
   components: {
     ValidationProvider,
     ValidationObserver
-  },
-  computed: {
   }
 })
 export default class Login extends Vue {
