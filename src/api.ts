@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-function authHeaders (token: string) {
+function authHeaders(token: string) {
   return {
     headers: {
       Authorization: `Bearer ${token}`
@@ -9,14 +9,14 @@ function authHeaders (token: string) {
 }
 
 export const api = {
-  async logInGetToken (username: string, password: string) {
+  logInGetToken(username: string, password: string) {
     const params = new URLSearchParams()
     params.append('username', username)
     params.append('password', password)
 
-    return axios.post('localhost:8000/api/login/access-token', params)
+    return axios.post('http://127.0.0.1:8000/api/login/access-token', params)
   },
-  async getUsers (token: string) {
-    return axios.get('localhost:8000/api/users/', authHeaders(token)).then(response => console.log(response))
+  getUsers(token: string) {
+    return axios.get('http://127.0.0.1:8000/api/users/', authHeaders(token))
   }
 }
