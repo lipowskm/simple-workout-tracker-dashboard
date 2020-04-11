@@ -13,6 +13,11 @@ const routes: Array<RouteConfig> = [
         path: '/login',
         name: 'Login',
         component: () => import(/* webpackChunkName: "login" */ '@/views/Login.vue')
+      },
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue')
       }
     ]
   },

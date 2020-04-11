@@ -8,15 +8,20 @@ function authHeaders(token: string) {
   }
 }
 
+const apiUrl = process.env.VUE_APP_API_URL
+
 export const api = {
-  logInGetToken(username: string, password: string) {
+  async logInGetToken(username: string, password: string) {
     const params = new URLSearchParams()
     params.append('username', username)
     params.append('password', password)
 
-    return axios.post('http://127.0.0.1:8000/api/login/access-token', params)
+    return axios.post(`${apiUrl}/api/login/access-token`, params)
   },
-  getUsers(token: string) {
-    return axios.get('http://127.0.0.1:8000/api/users/', authHeaders(token))
+  async getMe(token: string) {
+    return axios.get(`${apiUrl}/api/users/me`, authHeaders(token))
+  },
+  async getUsers(token: string) {
+    return axios.get(`${apiUrl}/api/users/`, authHeaders(token))
   }
 }

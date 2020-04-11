@@ -6,26 +6,38 @@
 
 import { Component, Vue } from 'vue-property-decorator'
 import { Route } from 'vue-router'
+import { dispatchCheckLoggedIn } from '@/store/actions'
+import { readIsLoggedIn } from '@/store/getters'
+import store from '@/store'
+
+const startRouteGuard = async (to: Route, from: Route, next: Function) => {
+  await dispatchCheckLoggedIn(store)
+  if (readIsLoggedIn(store)) {
+    if (to.path === '/login' || to.path === '/') {
+      next('/dashboard')
+    } else {
+      next()
+    }
+  } else if (readIsLoggedIn(store) === false) {
+    if (to.path === '/' || (to.path as string).startsWith('/dashboard')) {
+      next('/login')
+    } else {
+      next()
+    }
+  }
+}
 
 @Component
 export default class Start extends Vue {
   beforeRouteEnter(to: Route, from: Route, next: Function) {
     next(() => {
-      if (to.path === '/' || (to.path).startsWith('/main')) {
-        next('/login')
-      } else {
-        next()
-      }
+      startRouteGuard(to, from, next)
     })
   }
 
   beforeRouteUpdate(to: Route, from: Route, next: Function) {
     next(() => {
-      if (to.path === '/' || (to.path).startsWith('/main')) {
-        next('/login')
-      } else {
-        next()
-      }
+      startRouteGuard(to, from, next)
     })
   }
 }

@@ -15,6 +15,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-inferrable-types': 0,
+    'no-use-before-define': 0,
     'space-before-function-paren': ['error', {
       anonymous: 'always',
       named: 'never',

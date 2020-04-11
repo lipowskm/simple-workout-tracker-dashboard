@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-content v-if="$store.state.isLoggedIn===false">
     <v-container fill-height>
       <v-layout row wrap justify-center>
         <v-flex xs12 sm8 md4 align-self-center>
@@ -126,6 +126,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
 import { required, email, min } from 'vee-validate/dist/rules'
+import { dispatchLogIn } from '@/store/actions'
 
 @Component({
   components: {
@@ -146,6 +147,7 @@ export default class Login extends Vue {
   loginButtonClicked: boolean
   registerButtonClicked: boolean
   toolbarText = 'Please enter your credentials'
+  loginError = false
 
   constructor() {
     super()
@@ -169,13 +171,15 @@ export default class Login extends Vue {
     })
   }
 
-  get loginError(): boolean {
-    return false
-  }
-
-  async submit() {
-    const result = await this.$refs.observer.validate()
-    if (result) await this.$router.push('/')
+  submit() {
+    this.loginError = false
+    this.$refs.observer.validate().then(isValidated => {
+      if (isValidated) {
+        dispatchLogIn(this.$store, { username: this.username, password: this.password }).then(result => {
+          if (!result) this.loginError = true
+        })
+      }
+    })
   }
 
   toggleLogin() {
