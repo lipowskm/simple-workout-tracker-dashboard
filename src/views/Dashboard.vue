@@ -58,7 +58,7 @@ export default class Dashboard extends Vue {
 
   logOut() {
     dispatchLogOut(this.$store)
-    this.$toast('Logged out successfully', { color: 'success' })
+    this.$toast('Logged out successfully', { color: 'success', icon: 'mdi-check-circle' })
   }
 }
 
