@@ -23,6 +23,7 @@ export const actions = {
         return true
       } else {
         await dispatchLogOut(context)
+        return false
       }
     } catch (err) {
       await dispatchLogOut(context)
@@ -76,12 +77,12 @@ export const actions = {
       await dispatchLogOut(context)
     }
   },
-  actionRouteLoggedIn(context: MainContext) {
+  actionRouteLoggedIn() {
     if (router.currentRoute.path === '/login' || router.currentRoute.path === '/') {
       router.push('/dashboard')
     }
   },
-  actionRouteLogOut(context: MainContext) {
+  actionRouteLogOut() {
     if (router.currentRoute.path !== '/login') {
       router.push('/login')
     }

@@ -4,9 +4,9 @@ module.exports = {
     node: true
   },
   extends: [
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
     '@vue/standard',
-    '@vue/typescript/recommended'
+    '@vue/typescript'
   ],
   parserOptions: {
     ecmaVersion: 2020
@@ -16,6 +16,10 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-inferrable-types': 0,
     'no-use-before-define': 0,
+    'ordered-imports': 0,
+    camelcase: 0,
+    'no-unused-vars': 0,
+    '@typescript-eslint/no-unused-vars': 2,
     'space-before-function-paren': ['error', {
       anonymous: 'always',
       named: 'never',

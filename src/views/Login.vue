@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable -->
   <v-content v-if="$store.state.isLoggedIn===false">
     <v-container fill-height>
       <v-layout row wrap justify-center>
@@ -48,15 +49,17 @@
                                       type="password"></v-text-field>
                       </ValidationProvider>
                     </v-form>
-                    <div v-if="loginError">
-                      <v-alert :value="loginError" transition="fade-transition" type="error">
-                        Incorrect credentials
-                      </v-alert>
-                    </div>
+                    <v-expand-transition>
+                      <div v-if="loginError">
+                        <v-alert :value="loginError" transition="fade-transition" type="error">
+                          Incorrect credentials
+                        </v-alert>
+                      </div>
+                    </v-expand-transition>
                     <v-card-actions>
-                      <v-btn @click="submit" :disabled="invalid" color="primary">Login</v-btn>
+                      <v-btn @click="submitLogin" :disabled="invalid" :loading="isLoading" color="primary">Login</v-btn>
                       <v-flex class="caption text-sm-right">
-                        <router-link to="/recover-password">Forgot your password?</router-link>
+                        <router-link :to="{ name: 'dashboard' }" target="_blank">Forgot your password?</router-link>
                       </v-flex>
                     </v-card-actions>
                   </v-card-text>
@@ -108,7 +111,7 @@
                       </ValidationProvider>
                     </v-form>
                     <v-card-actions>
-                      <v-btn @click="submit" color="primary">Sign up</v-btn>
+                      <v-btn color="primary" :loading="isLoading">Sign up</v-btn>
                     </v-card-actions>
                   </v-card-text>
                 </div>
@@ -119,6 +122,7 @@
       </v-layout>
     </v-container>
   </v-content>
+  <!-- eslint-enable -->
 </template>
 
 <script lang="ts">
@@ -127,6 +131,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
 import { required, email, min } from 'vee-validate/dist/rules'
 import { dispatchLogIn } from '@/store/actions'
+import { readUserProfile } from '@/store/getters'
 
 @Component({
   components: {
@@ -148,6 +153,7 @@ export default class Login extends Vue {
   registerButtonClicked: boolean
   toolbarText = 'Please enter your credentials'
   loginError = false
+  isLoading = false
 
   constructor() {
     super()
@@ -171,18 +177,28 @@ export default class Login extends Vue {
     })
   }
 
-  submit() {
+  get userFirstName() {
+    const profile = readUserProfile(this.$store)
+    return profile?.first_name
+  }
+
+  submitLogin() {
     this.loginError = false
+    this.isLoading = true
     this.$refs.observer.validate().then(isValidated => {
       if (isValidated) {
         dispatchLogIn(this.$store, { username: this.username, password: this.password }).then(result => {
-          if (!result) this.loginError = true
+          if (!result) {
+            this.isLoading = false
+            this.loginError = true
+          } else this.$toast(`Welcome, ${this.userFirstName}`)
         })
       }
     })
   }
 
   toggleLogin() {
+    this.loginError = false
     this.loginButtonClicked = true
     this.registerButtonClicked = false
     this.toolbarText = 'Please enter your credentials'
