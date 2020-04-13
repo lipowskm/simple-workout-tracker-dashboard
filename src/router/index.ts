@@ -6,17 +6,17 @@ Vue.use(VueRouter)
 const routes: Array<RouteConfig> = [
   {
     path: '/',
-    name: 'Start',
+    name: 'start',
     component: () => import(/* webpackChunkName: "start" */ '@/views/Start.vue'),
     children: [
       {
         path: '/login',
-        name: 'Login',
+        name: 'login',
         component: () => import(/* webpackChunkName: "login" */ '@/views/Login.vue')
       },
       {
         path: '/dashboard',
-        name: 'Dashboard',
+        name: 'dashboard',
         component: () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue')
       }
     ]

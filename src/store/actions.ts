@@ -65,7 +65,7 @@ export const actions = {
       } else if (error.request) {
         console.log(error.request)
       } else {
-        console.log('Error', error.message)
+        console.log('[ERROR] ', error.message)
       }
       return { message: 'Something went wrong, please try again', success: false }
     }

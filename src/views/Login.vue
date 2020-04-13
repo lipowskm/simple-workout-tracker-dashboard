@@ -8,12 +8,10 @@
             <v-card class="elevation-12">
               <v-tabs centered grow v-model="activeTab">
                 <v-tab :key="1"
-                  v-model="loginButtonClicked"
                   v-on:click="toggleLogin">
                   Login
                 </v-tab>
                 <v-tab :key="2"
-                  v-model="registerButtonClicked"
                   v-on:click="toggleRegister">
                   Register
                 </v-tab>
