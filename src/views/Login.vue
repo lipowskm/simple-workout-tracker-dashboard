@@ -4,15 +4,15 @@
     <v-container fill-height>
       <v-layout row wrap justify-center>
         <v-flex xs12 sm8 md4 align-self-center>
-          <ValidationObserver ref="observer" @submit.prevent="submit()" v-slot="{ invalid }">
+          <ValidationObserver ref="observer" v-slot="{ invalid }">
             <v-card class="elevation-12">
-              <v-tabs centered>
-                <v-tab
+              <v-tabs centered grow v-model="activeTab">
+                <v-tab :key="1"
                   v-model="loginButtonClicked"
                   v-on:click="toggleLogin">
                   Login
                 </v-tab>
-                <v-tab
+                <v-tab :key="2"
                   v-model="registerButtonClicked"
                   v-on:click="toggleRegister">
                   Register
@@ -24,13 +24,13 @@
                 <v-spacer></v-spacer>
               </v-toolbar>
               <v-expand-transition>
-                <div v-if="loginButtonClicked">
+                <div v-if="activeTab===0">
                   <v-card-text>
-                    <v-form @keyup.enter="submit">
+                    <v-form @keyup.enter="submitLogin">
                       <ValidationProvider name="Username" rules="required" mode="aggressive">
                         <v-text-field slot-scope="{ errors }"
                                       :error-messages="errors"
-                                      @keyup.enter="submit"
+                                      @keyup.enter="submitLogin"
                                       v-model="username"
                                       prepend-icon="mdi-account-circle"
                                       name="username"
@@ -40,7 +40,7 @@
                       <ValidationProvider name="Password" rules="required" mode="aggressive">
                         <v-text-field slot-scope="{ errors }"
                                       :error-messages="errors"
-                                      @keyup.enter="submit"
+                                      @keyup.enter="submitLogin"
                                       v-model="password"
                                       prepend-icon="mdi-lock"
                                       name="password"
@@ -52,7 +52,7 @@
                     <v-expand-transition>
                       <div v-if="loginError">
                         <v-alert :value="loginError" transition="fade-transition" type="error">
-                          Incorrect credentials
+                          {{loginError}}
                         </v-alert>
                       </div>
                     </v-expand-transition>
@@ -66,7 +66,7 @@
                 </div>
               </v-expand-transition>
               <v-expand-transition>
-                <div v-if="registerButtonClicked">
+                <div v-if="activeTab===1">
                   <v-card-text>
                     <v-form>
                       <ValidationProvider name="First name" rules="required|min:3" mode="eager">
@@ -111,7 +111,7 @@
                       </ValidationProvider>
                     </v-form>
                     <v-card-actions>
-                      <v-btn color="primary" :loading="isLoading">Sign up</v-btn>
+                      <v-btn @click="submitRegister" color="primary" :loading="isLoading">Sign up</v-btn>
                     </v-card-actions>
                   </v-card-text>
                 </div>
@@ -130,8 +130,9 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
 import { required, email, min } from 'vee-validate/dist/rules'
-import { dispatchLogIn } from '@/store/actions'
-import { readUserProfile } from '@/store/getters'
+import { dispatchLogIn, dispatchRegister } from '@/store/actions'
+import { readLoginError, readUserProfile } from '@/store/getters'
+import { commitLoginError } from '@/store/mutations'
 
 @Component({
   components: {
@@ -149,17 +150,13 @@ export default class Login extends Vue {
   firstName: string
   lastName: string
   email: string
-  loginButtonClicked: boolean
-  registerButtonClicked: boolean
   toolbarText = 'Please enter your credentials'
-  loginError = false
   isLoading = false
+  activeTab = 0
 
   constructor() {
     super()
-    this.username = this.password = this.firstName = this.lastName = this.email = ''
-    this.loginButtonClicked = true
-    this.registerButtonClicked = false
+    this.username = this.password = this.email = this.firstName = this.lastName = ''
 
     extend('required', {
       ...required,
@@ -182,31 +179,63 @@ export default class Login extends Vue {
     return profile?.first_name
   }
 
+  get loginError() {
+    return readLoginError(this.$store)
+  }
+
+  set loginError(payload: string | null) {
+    commitLoginError(this.$store, payload)
+  }
+
   submitLogin() {
-    this.loginError = false
     this.isLoading = true
+    this.loginError = null
     this.$refs.observer.validate().then(isValidated => {
       if (isValidated) {
         dispatchLogIn(this.$store, { username: this.username, password: this.password }).then(result => {
           if (!result) {
             this.isLoading = false
-            this.loginError = true
           } else this.$toast(`Welcome, ${this.userFirstName}`)
         })
       }
     })
   }
 
+  submitRegister() {
+    this.$refs.observer.validate().then(isValidated => {
+      if (isValidated) {
+        this.isLoading = true
+        dispatchRegister(this.$store, {
+          username: this.username,
+          password: this.password,
+          email: this.email,
+          firstName: this.firstName,
+          lastName: this.lastName
+        }).then(result => {
+          if (result.success) {
+            this.$toast(result.message, { color: 'success', icon: 'mdi-check-circle', timeout: 6000 })
+            this.toggleLogin()
+          } else this.$toast(result.message, { color: 'error', icon: 'mdi-alert', timeout: 3000 })
+          this.isLoading = false
+        })
+      }
+    })
+  }
+
+  flush() {
+    this.username = this.password = this.email = this.firstName = this.lastName = ''
+  }
+
   toggleLogin() {
-    this.loginError = false
-    this.loginButtonClicked = true
-    this.registerButtonClicked = false
+    this.flush()
+    commitLoginError(this.$store, null)
+    this.activeTab = 0
     this.toolbarText = 'Please enter your credentials'
   }
 
   toggleRegister() {
-    this.loginButtonClicked = false
-    this.registerButtonClicked = true
+    this.flush()
+    this.activeTab = 1
     this.toolbarText = 'Create new account'
   }
 }

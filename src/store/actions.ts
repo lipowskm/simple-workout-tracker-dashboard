@@ -1,5 +1,5 @@
 import { getLocalToken, removeLocalToken, saveLocalToken } from '@/token-utils'
-import { commitSetLoggedIn, commitSetToken, commitSetUserProfile } from '@/store/mutations'
+import { commitLoginError, commitSetLoggedIn, commitSetToken, commitSetUserProfile } from '@/store/mutations'
 import { State } from '@/store/state'
 import { api } from '@/api'
 import { ActionContext } from 'vuex'
@@ -18,6 +18,7 @@ export const actions = {
         saveLocalToken(token)
         commitSetToken(context, token)
         commitSetLoggedIn(context, true)
+        commitLoginError(context, '')
         await dispatchSetUserProfile(context)
         await dispatchRouteLoggedIn(context)
         return true
@@ -25,9 +26,48 @@ export const actions = {
         await dispatchLogOut(context)
         return false
       }
-    } catch (err) {
+    } catch (error) {
       await dispatchLogOut(context)
+      if (error.response) {
+        commitLoginError(context, error.response.data.detail)
+      } else if (error.request) {
+        console.log(error.request)
+      } else {
+        console.log('Error', error.message)
+      }
       return false
+    }
+  },
+  async actionRegister(context: MainContext, payload: {
+    username: string,
+    password: string,
+    email: string,
+    firstName: string,
+    lastName: string
+  }) {
+    try {
+      const response = await api.registerAccount(
+        payload.username,
+        payload.password,
+        payload.email,
+        payload.firstName,
+        payload.lastName)
+      let msg: string = response.data.msg
+      if (!msg) {
+        msg = 'New account email sent, check your inbox to verify your account'
+        return { message: msg, success: true }
+      }
+      return { message: msg, success: true }
+    } catch (error) {
+      await dispatchLogOut(context)
+      if (error.response) {
+        return { message: error.response.data.detail, success: false }
+      } else if (error.request) {
+        console.log(error.request)
+      } else {
+        console.log('Error', error.message)
+      }
+      return { message: 'Something went wrong, please try again', success: false }
     }
   },
   async actionSetUserProfile(context: MainContext) {
@@ -96,6 +136,7 @@ export const dispatchCheckLoggedIn = dispatch(actions.actionCheckLoggedIn)
 export const dispatchSetUserProfile = dispatch(actions.actionSetUserProfile)
 export const dispatchLogIn = dispatch(actions.actionLogIn)
 export const dispatchLogOut = dispatch(actions.actionLogOut)
+export const dispatchRegister = dispatch(actions.actionRegister)
 export const dispatchRemoveLogIn = dispatch(actions.actionRemoveLogIn)
 export const dispatchRouteLoggedIn = dispatch(actions.actionRouteLoggedIn)
 export const dispatchRouteLogOut = dispatch(actions.actionRouteLogOut)

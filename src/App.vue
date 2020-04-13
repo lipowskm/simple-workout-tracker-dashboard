@@ -14,9 +14,6 @@
               align-self-center
             >
               <div style="text-align: center">
-                <div class="headline my-5">
-                  Loading...
-                </div>
                 <v-progress-circular
                   size="100"
                   indeterminate

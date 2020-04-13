@@ -9,6 +9,7 @@ Vue.use(Vuex)
 
 const defaultState: State = {
   isLoggedIn: null,
+  loginError: null,
   token: '',
   userProfile: null
 }
