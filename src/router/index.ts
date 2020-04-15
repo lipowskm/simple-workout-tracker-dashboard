@@ -15,6 +15,16 @@ const routes: Array<RouteConfig> = [
         component: () => import(/* webpackChunkName: "login" */ '@/views/Login.vue')
       },
       {
+        path: '/recover-password',
+        name: 'recoverPassword',
+        component: () => import(/* webpackChunkName: "recover-password" */ '@/views/RecoverPassword.vue')
+      },
+      {
+        path: '/verify-account',
+        name: 'verifyAccount',
+        component: () => import(/* webpackChunkName: "recover-password" */ '@/views/VerifyAccount.vue')
+      },
+      {
         path: '/dashboard',
         name: 'dashboard',
         component: () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue')

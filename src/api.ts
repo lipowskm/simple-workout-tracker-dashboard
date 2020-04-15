@@ -28,6 +28,12 @@ export const api = {
 
     return axios.post(`${apiUrl}/api/register`, params)
   },
+  async verifyAccount(token: string) {
+    const params = new URLSearchParams()
+    params.append('token', token)
+
+    return axios.post(`${apiUrl}/api/verify-account`, params)
+  },
   async getMe(token: string) {
     return axios.get(`${apiUrl}/api/users/me`, authHeaders(token))
   },

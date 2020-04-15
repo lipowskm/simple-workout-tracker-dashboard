@@ -8,11 +8,11 @@
             <v-card class="elevation-12">
               <v-tabs centered grow v-model="activeTab">
                 <v-tab :key="1"
-                  v-on:click="toggleLogin">
+                       v-on:click="toggleLogin">
                   Login
                 </v-tab>
                 <v-tab :key="2"
-                  v-on:click="toggleRegister">
+                       v-on:click="toggleRegister">
                   Register
                 </v-tab>
               </v-tabs>
@@ -32,7 +32,7 @@
                                       v-model="username"
                                       prepend-icon="mdi-account-circle"
                                       name="username"
-                                      label="Username/email"
+                                      label="Username or email address"
                                       type="text"></v-text-field>
                       </ValidationProvider>
                       <ValidationProvider name="Password" rules="required" mode="aggressive">
@@ -50,14 +50,14 @@
                     <v-expand-transition>
                       <div v-if="loginError">
                         <v-alert :value="loginError" transition="fade-transition" type="error">
-                          {{loginError}}
+                          {{ loginError }}
                         </v-alert>
                       </div>
                     </v-expand-transition>
                     <v-card-actions>
                       <v-btn @click="submitLogin" :disabled="invalid" :loading="isLoading" color="primary">Login</v-btn>
                       <v-flex class="caption text-sm-right">
-                        <router-link :to="{ name: 'dashboard' }" target="_blank">Forgot your password?</router-link>
+                        <router-link :to="{ name: 'recoverPassword' }">Forgot your password?</router-link>
                       </v-flex>
                     </v-card-actions>
                   </v-card-text>
@@ -67,49 +67,78 @@
                 <div v-if="activeTab===1">
                   <v-card-text>
                     <v-form>
-                      <ValidationProvider name="First name" rules="required|min:3" mode="eager">
-                        <v-text-field slot-scope="{ errors }"
+                      <ValidationProvider name="First name" rules="required|min:2" mode="eager">
+                        <v-text-field slot-scope="{ errors, valid }"
                                       :error-messages="errors"
                                       v-model="firstName"
                                       name="firstName"
-                                      label="First name"
-                                      type="text"></v-text-field>
+                                      type="text"
+                                      :success="valid"
+                                      autofocus>
+                          <template #label>
+                            <span class="red--text"><strong>* </strong></span>First name
+                          </template>
+                        </v-text-field>
                       </ValidationProvider>
                       <v-text-field v-model="lastName"
                                     name="lastName"
                                     label="Last name"
                                     type="text"></v-text-field>
                       <ValidationProvider name="Email" rules="required|email" mode="eager">
-                        <v-text-field slot-scope="{ errors }"
+                        <v-text-field slot-scope="{ errors, valid }"
                                       :error-messages="errors"
                                       v-model="email"
-                                      prepend-icon="mdi-email"
                                       name="email"
-                                      label="Email"
-                                      type="text"></v-text-field>
+                                      type="text"
+                                      :success="valid">
+                          <template #label>
+                            <span class="red--text"><strong>* </strong></span>Email address
+                          </template>
+                        </v-text-field>
                       </ValidationProvider>
-                      <ValidationProvider name="Username" rules="required|min:3" mode="eager">
-                        <v-text-field slot-scope="{ errors }"
+                      <ValidationProvider name="Username" rules="required|min:6" mode="eager">
+                        <v-text-field slot-scope="{ errors, valid }"
                                       :error-messages="errors"
                                       v-model="username"
-                                      prepend-icon="mdi-account-circle"
                                       name="username"
-                                      label="Username"
-                                      type="text"></v-text-field>
+                                      type="text"
+                                      :success="valid">
+                          <template #label>
+                            <span class="red--text"><strong>* </strong></span>Username
+                          </template>
+                        </v-text-field>
                       </ValidationProvider>
-                      <ValidationProvider name="Password" rules="required|min:6" mode="eager">
-                        <v-text-field slot-scope="{ errors }"
+                      <ValidationProvider name="Password" rules="required|min:6" mode="eager" vid="password">
+                        <v-text-field slot-scope="{ errors, valid }"
                                       :error-messages="errors"
                                       v-model="password"
-                                      prepend-icon="mdi-lock"
                                       name="password"
-                                      label="Password"
-                                      id="password"
-                                      type="password"></v-text-field>
+                                      type="password"
+                                      :success="valid">
+                          <template #label>
+                            <span class="red--text"><strong>* </strong></span>Password
+                          </template>
+                        </v-text-field>
+                      </ValidationProvider>
+                      <ValidationProvider name="Confirm password" rules="required|confirmed:password" mode="aggressive">
+                        <v-text-field slot-scope="{ errors, valid }"
+                                      :error-messages="errors"
+                                      v-model="confirmPassword"
+                                      name="confirmPassword"
+                                      type="password"
+                                      :success="valid">
+                          <template #label>
+                            <span class="red--text"><strong>* </strong></span>Confirm password
+                          </template>
+                          <template slot="append">
+                            <v-icon v-if="confirmPassword && valid" color="success">mdi-check</v-icon>
+                            <v-icon v-if="confirmPassword && !valid" color="error">mdi-close</v-icon>
+                          </template>
+                        </v-text-field>
                       </ValidationProvider>
                     </v-form>
                     <v-card-actions>
-                      <v-btn @click="submitRegister" color="primary" :loading="isLoading">Sign up</v-btn>
+                      <v-btn block @click="submitRegister" color="primary" :loading="isLoading">Sign up</v-btn>
                     </v-card-actions>
                   </v-card-text>
                 </div>
@@ -127,7 +156,7 @@
 
 import { Component, Vue } from 'vue-property-decorator'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
-import { required, email, min } from 'vee-validate/dist/rules'
+import { required, email, min, confirmed } from 'vee-validate/dist/rules'
 import { dispatchLogIn, dispatchRegister } from '@/store/actions'
 import { readLoginError, readUserProfile } from '@/store/getters'
 import { commitLoginError } from '@/store/mutations'
@@ -143,32 +172,35 @@ export default class Login extends Vue {
     observer: InstanceType<typeof ValidationObserver>;
   }
 
-  username: string
-  password: string
-  firstName: string
-  lastName: string
-  email: string
-  toolbarText = 'Please enter your credentials'
-  isLoading = false
-  activeTab = 0
+  username: string = ''
+  password: string = ''
+  confirmPassword: string = ''
+  firstName: string = ''
+  lastName: string = ''
+  email: string = ''
+  toolbarText: string = 'Please enter your credentials'
+  isLoading: boolean = false
+  activeTab: number = 0
 
-  constructor() {
-    super()
-    this.username = this.password = this.email = this.firstName = this.lastName = ''
-
+  mounted() {
     extend('required', {
       ...required,
-      message: '{_field_} is required'
+      message: 'Required'
     })
 
     extend('email', {
       ...email,
-      message: 'This is not a valid email address'
+      message: 'Invalid email'
     })
 
     extend('min', {
       ...min,
       message: '{_field_} must be at least {length} characters long'
+    })
+
+    extend('confirmed', {
+      ...confirmed,
+      message: "Passwords don't match"
     })
   }
 
@@ -193,7 +225,9 @@ export default class Login extends Vue {
         dispatchLogIn(this.$store, { username: this.username, password: this.password }).then(result => {
           if (!result) {
             this.isLoading = false
-          } else this.$toast(`Welcome, ${this.userFirstName}`)
+          } else {
+            this.$toast(`Welcome, ${this.userFirstName}`)
+          }
         })
       }
     })
@@ -225,16 +259,20 @@ export default class Login extends Vue {
   }
 
   toggleLogin() {
-    this.flush()
-    commitLoginError(this.$store, null)
-    this.activeTab = 0
-    this.toolbarText = 'Please enter your credentials'
+    if (this.activeTab !== 0) {
+      this.flush()
+      commitLoginError(this.$store, null)
+      this.activeTab = 0
+      this.toolbarText = 'Please enter your credentials'
+    }
   }
 
   toggleRegister() {
-    this.flush()
-    this.activeTab = 1
-    this.toolbarText = 'Create new account'
+    if (this.activeTab !== 1) {
+      this.flush()
+      this.activeTab = 1
+      this.toolbarText = 'Create new account'
+    }
   }
 }
 

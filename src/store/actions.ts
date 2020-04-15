@@ -70,6 +70,24 @@ export const actions = {
       return { message: 'Something went wrong, please try again', success: false }
     }
   },
+  async actionVerifyAccount(context: MainContext, payload: { token: string }) {
+    try {
+      const response = (await Promise.all([
+        api.verifyAccount(payload.token),
+        await new Promise((resolve) => setTimeout(() => resolve(), 1000))
+      ]))[0]
+      return { message: response.data.msg, success: true }
+    } catch (error) {
+      if (error.response) {
+        return { message: error.response.data.detail, success: false }
+      } else if (error.request) {
+        console.log(error.request)
+      } else {
+        console.log('[ERROR] ', error.message)
+      }
+      return { message: 'Something went wrong, please try again', success: false }
+    }
+  },
   async actionSetUserProfile(context: MainContext) {
     try {
       const response = await api.getMe(context.state.token)
@@ -140,3 +158,4 @@ export const dispatchRegister = dispatch(actions.actionRegister)
 export const dispatchRemoveLogIn = dispatch(actions.actionRemoveLogIn)
 export const dispatchRouteLoggedIn = dispatch(actions.actionRouteLoggedIn)
 export const dispatchRouteLogOut = dispatch(actions.actionRouteLogOut)
+export const dispatchVerifyAccount = dispatch(actions.actionVerifyAccount)

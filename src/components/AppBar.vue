@@ -28,6 +28,7 @@
       <template v-slot:activator="{ on }">
         <v-btn
           outlined
+          class="username-button"
           v-on="on"
         >
           {{ username }}
@@ -101,5 +102,7 @@ export default class AppBar extends Vue {
 </script>
 
 <style scoped>
-
+  .username-button {
+    text-transform: none !important;
+  }
 </style>
